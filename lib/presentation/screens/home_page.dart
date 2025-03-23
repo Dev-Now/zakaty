@@ -52,34 +52,74 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: 
-      // Column(
-      //   mainAxisAlignment: MainAxisAlignment.center,
-      //   children: <Widget>[
-          // const Text('Your total year savings:'),
-          // Text(
-          //   '$_totalSavings',
-          //   style: Theme.of(context).textTheme.headlineMedium,
-          // ),
-          // const Text('Your zakat:'),
-          // Text(
-          //   '$_zakat',
-          //   style: Theme.of(context).textTheme.headlineMedium,
-          // ),
-        //],
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-              itemCount: _amounts.length,
-              itemBuilder: (context, index) {
-                return AmountWidget(
-                  amount: _amounts[index],
-                  onToggleIncludedInSavings: (isIncluded) => _updateAmount(index, isIncluded),
-                );
-              },
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // table headers
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.black, width: 1)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 1.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text("Type", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Amount", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Currency", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Included", style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
             ),
           ),
-      //),
+
+          // scrollable list of amounts
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: ListView.builder(
+                itemCount: _amounts.length,
+                itemBuilder: (context, index) {
+                  return AmountWidget(
+                        amount: _amounts[index],
+                        onToggleIncludedInSavings: (isIncluded) => _updateAmount(index, isIncluded),
+                    );
+                },
+              ),
+            ),
+          ),
+
+          // Fixed footer
+          Container(
+            padding: const EdgeInsets.all(25.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              border: const Border(top: BorderSide(color: Colors.black, width: 1)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Total Savings:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("$_totalSavings TND"),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Zakat (2.5%):", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("$_zakat TND"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addAmount,
         tooltip: 'Add new amount',

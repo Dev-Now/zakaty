@@ -34,19 +34,22 @@ class _AmountWidgetState extends State<AmountWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 1.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(widget.amount.type == AmountType.saving ? "Savings" : "Advanced Zakat"),
           Text("${widget.amount.value}"),
           Text(widget.amount.currency),
-          Switch(
-            value: _isIncludedInSavings,
-            onChanged: _toggleIncludedInSavings,
+          Visibility(
+            visible: widget.amount.type == AmountType.advancedZakatPortion,
+            child: Switch(
+              value: _isIncludedInSavings,
+              onChanged: _toggleIncludedInSavings,
             ),
+          ),
         ],
-        )
+      )
     );
   }
 }
