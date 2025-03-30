@@ -38,7 +38,7 @@ class _AmountWidgetState extends State<AmountWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(widget.amount.type == AmountType.saving ? "Savings" : "Advanced Zakat"),
+          Text(widget.amount.getFullTypeName()),
           Text("${widget.amount.value}"),
           Text(widget.amount.currency),
           Visibility(

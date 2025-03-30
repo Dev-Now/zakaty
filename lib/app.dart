@@ -11,7 +11,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
       ),
-      home: const HomePage(title: 'Zakat Calculator'),
+      home: const HomePage(),
     );
   }
 }
