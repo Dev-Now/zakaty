@@ -33,23 +33,30 @@ class _AmountWidgetState extends State<AmountWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(widget.amount.getFullTypeName()),
-          Text("${widget.amount.value}"),
-          Text(widget.amount.currency),
-          Visibility(
-            visible: widget.amount.type == AmountType.advancedZakatPortion,
-            child: Switch(
-              value: _isIncludedInSavings,
-              onChanged: _toggleIncludedInSavings,
+    var theme = Theme.of(context);
+
+    return Card(
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(widget.amount.name),
+            Text('(${widget.amount.getFullTypeName()})'),
+            Text('${widget.amount.value}'),
+            Text(widget.amount.currency),
+            Text(widget.amount.isSaving() ? 'Included in total savings' : 'Not included in total savings'), // !!!TODO... use card background color instead!
+            Visibility(
+              visible: widget.amount.type == AmountType.advancedZakatPortion,
+              child: Switch(
+                value: _isIncludedInSavings,
+                onChanged: _toggleIncludedInSavings,
+              ),
             ),
-          ),
-        ],
-      )
+          ],
+        ),
+      ),
     );
   }
 }
