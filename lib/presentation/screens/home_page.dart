@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
           ),
       ),
 
-      body: CalculationSheet(title: '28 Shawal 1445 - 1446'),
+      body: CalculationSheet(),
       
       persistentFooterButtons: [
         IconButton(

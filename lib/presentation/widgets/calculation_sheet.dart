@@ -1,71 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:zakaty/models/amount.dart';
+import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/amount_widget.dart';
-import '../../models/amount.dart';
 
 class CalculationSheet extends StatefulWidget {
-  final String title;
-  const CalculationSheet({super.key, required this.title});
+  const CalculationSheet({super.key});
 
   @override
   State<CalculationSheet> createState() => _CalculationSheetState();
 }
 
 class _CalculationSheetState extends State<CalculationSheet> {
-  final List<Amount> _amounts = [];
+  final ZakatCalculation _zakatCalculation = ZakatCalculation(
+    title: '28 Shawal 1445 - 1446',
+    currency: 'TND',
+  );
 
-  double _zakat = 0;
-  double _totalSavings = 0;
+  late String _zakatSummary;
 
-  void _calculateZakat() {
-    _totalSavings = 0;
-    for (var amount in _amounts) {
-      if (amount.isSaving()) {
-        _totalSavings += amount.value;
-      }
-    }
-    _zakat = _totalSavings / 40;
+  @override
+  void initState() {
+    super.initState();
+    _zakatSummary = _zakatCalculation.getCalculationSummary();
   }
 
   void _addAmount() {
     setState(() {
-      _amounts.add(Amount(name: 'Saving ${_amounts.length}'));
-      _calculateZakat();
+      _zakatCalculation.addAmount(
+        Amount(name: 'Saving ${_zakatCalculation.amounts.length + 1}')
+      );
+      _zakatSummary = _zakatCalculation.getCalculationSummary();
     });
   }
 
   void _updateAmount(int index, bool isIncluded) {
     setState(() {
-      _amounts[index] = Amount(
-        name: _amounts[index].name,
-        value: _amounts[index].value,
-        type: _amounts[index].type,
-        includedInSavings: isIncluded,
-        currency: _amounts[index].currency,
-      );
-      _calculateZakat();
+      _zakatCalculation.setIncludeAmountInSavings(index, isIncluded);
+      _zakatSummary = _zakatCalculation.getCalculationSummary();
     });
-  }
-
-  void _showAmountEditDialog() {
-    // !!!TODO...
   }
 
   @override
   Widget build(BuildContext context) {
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
     
     return Scaffold(
       appBar: AppBar(
         backgroundColor: theme.colorScheme.secondary,
-        foregroundColor: theme.colorScheme.surfaceBright,
-        title: Text(widget.title),
+        foregroundColor: theme.colorScheme.onSecondary,
+        title: Text(_zakatSummary),
       ),
 
       body: ListView.builder(
-        itemCount: _amounts.length,
+        itemCount: _zakatCalculation.amounts.length,
         itemBuilder: (context, index) {
           return AmountWidget(
-                amount: _amounts[index],
+                amount: _zakatCalculation.amounts[index],
                 onToggleIncludedInSavings: (isIncluded) => _updateAmount(index, isIncluded),
             );
         },

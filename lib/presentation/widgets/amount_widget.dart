@@ -34,24 +34,56 @@ class _AmountWidgetState extends State<AmountWidget> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    final textColor = widget.amount.isSaving() ? theme.colorScheme.onPrimaryFixed : theme.colorScheme.onErrorContainer;
+    final styleName = theme.textTheme.titleLarge!.copyWith(color: textColor);
+    final styleType = theme.textTheme.labelLarge!.copyWith(color: textColor, fontWeight: FontWeight.bold);
+    final styleValue = theme.textTheme.headlineLarge!.copyWith(color: textColor);
+    final styleCurrency = theme.textTheme.labelLarge!.copyWith(color: textColor, fontStyle: FontStyle.italic);
 
     return Card(
-      color: theme.colorScheme.surfaceContainerHighest,
+      color: widget.amount.isSaving() ? theme.colorScheme.primaryFixed : theme.colorScheme.errorContainer,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(widget.amount.name),
-            Text('(${widget.amount.getFullTypeName()})'),
-            Text('${widget.amount.value}'),
-            Text(widget.amount.currency),
-            Text(widget.amount.isSaving() ? 'Included in total savings' : 'Not included in total savings'), // !!!TODO... use card background color instead!
-            Visibility(
-              visible: widget.amount.type == AmountType.advancedZakatPortion,
-              child: Switch(
-                value: _isIncludedInSavings,
-                onChanged: _toggleIncludedInSavings,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('${widget.amount.name} ', style: styleName,),
+                  Text('(${widget.amount.getFullTypeName()})', style: styleType),
+                  Text(' : ', style: styleName),
+                  Text('${widget.amount.value} ', style: styleValue),
+                  Text(widget.amount.currency, style: styleCurrency),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Visibility(
+                    visible: widget.amount.type == AmountType.advancedZakatPortion,
+                    child: Switch(
+                      value: _isIncludedInSavings,
+                      onChanged: _toggleIncludedInSavings,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: IconButton.outlined(
+                      onPressed: () {}, // !!!TODO... 
+                      icon: const Icon(Icons.edit),
+                    ),
+                  ),
+                  IconButton.outlined(
+                    onPressed: () {}, // !!!TODO... 
+                    icon: const Icon(Icons.delete),
+                  )
+                ],
               ),
             ),
           ],

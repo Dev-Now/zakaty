@@ -9,7 +9,7 @@ class Amount {
 
   Amount({
     required this.name,
-    this.value = 0,
+    this.value = 0.0,
     this.type = AmountType.saving,
     this.includedInSavings = true,
     this.currency = 'TND',
