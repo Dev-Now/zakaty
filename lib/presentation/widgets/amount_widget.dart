@@ -34,14 +34,14 @@ class _AmountWidgetState extends State<AmountWidget> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    final textColor = widget.amount.isSaving() ? theme.colorScheme.onPrimaryFixed : theme.colorScheme.onErrorContainer;
+    final textColor = widget.amount.isSaving() ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onErrorContainer;
     final styleName = theme.textTheme.titleLarge!.copyWith(color: textColor);
     final styleType = theme.textTheme.labelLarge!.copyWith(color: textColor, fontWeight: FontWeight.bold);
     final styleValue = theme.textTheme.headlineLarge!.copyWith(color: textColor);
     final styleCurrency = theme.textTheme.labelLarge!.copyWith(color: textColor, fontStyle: FontStyle.italic);
 
     return Card(
-      color: widget.amount.isSaving() ? theme.colorScheme.primaryFixed : theme.colorScheme.errorContainer,
+      color: widget.amount.isSaving() ? theme.colorScheme.primaryContainer : theme.colorScheme.errorContainer,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(

@@ -4,23 +4,21 @@ import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/amount_widget.dart';
 
 class CalculationSheet extends StatefulWidget {
-  const CalculationSheet({super.key});
+  final ZakatCalculation calculationInstance;
+  const CalculationSheet({super.key, required this.calculationInstance});
 
   @override
   State<CalculationSheet> createState() => _CalculationSheetState();
 }
 
 class _CalculationSheetState extends State<CalculationSheet> {
-  final ZakatCalculation _zakatCalculation = ZakatCalculation(
-    title: '28 Shawal 1445 - 1446',
-    currency: 'TND',
-  );
-
+  late ZakatCalculation _zakatCalculation;
   late String _zakatSummary;
 
   @override
   void initState() {
     super.initState();
+    _zakatCalculation = widget.calculationInstance;
     _zakatSummary = _zakatCalculation.getCalculationSummary();
   }
 
@@ -45,6 +43,8 @@ class _CalculationSheetState extends State<CalculationSheet> {
     final theme = Theme.of(context);
     
     return Scaffold(
+      backgroundColor: theme.colorScheme.secondaryContainer,
+
       appBar: AppBar(
         backgroundColor: theme.colorScheme.secondary,
         foregroundColor: theme.colorScheme.onSecondary,
