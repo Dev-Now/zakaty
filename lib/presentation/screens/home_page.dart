@@ -38,8 +38,8 @@ class _HomePageState extends State<HomePage> {
       final calculationInstance = ZakatCalculation(
         title: 'ZAKAT $newIndex'
       );
-      _selectedCalculationInstance = newIndex;
       _calculationInstances.add(calculationInstance);
+      _selectedCalculationInstance = newIndex;
       _selectedCalculationSheet = CalculationSheet(
         key: ValueKey(DateTime.now()),
         calculationInstance: calculationInstance);
@@ -55,8 +55,8 @@ class _HomePageState extends State<HomePage> {
         currency: selectedCalculationInstance.currency,
       );
       copyInstance.addAmounts(selectedCalculationInstance.copyAmounts());
-      _selectedCalculationInstance = newIndex;
       _calculationInstances.add(copyInstance);
+      _selectedCalculationInstance = newIndex;
       _selectedCalculationSheet = CalculationSheet(
         key: ValueKey(DateTime.now()),
         calculationInstance: copyInstance,
@@ -88,23 +88,23 @@ class _HomePageState extends State<HomePage> {
 
       body: Row(
         children: [
-          SafeArea(
-            child: NavigationRail(
-              backgroundColor: theme.colorScheme.surfaceContainer,
-              extended: true,
-              destinations: [
-                NavigationRailDestination(
-                  icon: Icon(Icons.query_stats),
-                  label: Text('Exploration sheet')
-                ),
-                for (var calculationInstance in _calculationInstances)
-                  NavigationRailDestination(
-                    icon: Icon(Icons.calculate),
-                    label: Text(calculationInstance.title),
-                  ),
-              ],
-              selectedIndex: _selectedCalculationInstance,
-              onDestinationSelected: _setSelectedCalculationSheet,
+          SizedBox(
+            width: 350,
+            child: ListView.builder(
+              itemCount: _calculationInstances.length + 1,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: Icon(index == 0 ? Icons.query_stats : Icons.calculate),
+                  title: Text(index == 0 ? _exploreCalculationInstance.title : _calculationInstances[index - 1].title),
+                  selected: _selectedCalculationInstance == index,
+                  iconColor: theme.colorScheme.inversePrimary,
+                  textColor: theme.colorScheme.inversePrimary,
+                  tileColor: theme.colorScheme.surfaceContainer,
+                  selectedColor: theme.colorScheme.onPrimaryContainer,
+                  selectedTileColor: theme.colorScheme.primaryContainer,
+                  onTap: () => _setSelectedCalculationSheet(index),
+                );
+              },
             ),
           ),
           Expanded(
@@ -113,28 +113,34 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       
-      persistentFooterButtons: [
-        IconButton(
-          onPressed: () {}, // !!!TODO...
-          tooltip: 'Configure current calculation sheet',
-          icon: const Icon(Icons.settings_outlined),
+      bottomNavigationBar: BottomAppBar(
+        color: theme.colorScheme.surfaceContainer,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              onPressed: () {}, // !!!TODO...
+              tooltip: 'Configure current calculation sheet',
+              icon: const Icon(Icons.settings_outlined),
+            ),
+            IconButton(
+              onPressed: () {}, // !!!TODO...
+              tooltip: 'Delete current calculation sheet',
+              icon: const Icon(Icons.delete_outline),
+            ),
+            IconButton(
+              onPressed: _copyCalculationSheet,
+              tooltip: 'Copy current calculation sheet',
+              icon: const Icon(Icons.copy_outlined),
+            ),
+            IconButton(
+              onPressed: _addNewCalculationSheet,
+              tooltip: 'Add new calculation sheet',
+              icon: const Icon(Icons.add_chart_outlined),
+            ),
+          ],
         ),
-        IconButton(
-          onPressed: () {}, // !!!TODO...
-          tooltip: 'Delete current calculation sheet',
-          icon: const Icon(Icons.delete_outline),
-        ),
-        IconButton(
-          onPressed: _copyCalculationSheet,
-          tooltip: 'Copy current calculation sheet',
-          icon: const Icon(Icons.copy_outlined),
-        ),
-        IconButton(
-          onPressed: _addNewCalculationSheet,
-          tooltip: 'Add new calculation sheet',
-          icon: const Icon(Icons.add_chart_outlined),
-        ),
-      ],
+      ),
     );
   }
 }

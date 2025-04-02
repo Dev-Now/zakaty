@@ -55,9 +55,9 @@ class _CalculationSheetState extends State<CalculationSheet> {
         itemCount: _zakatCalculation.amounts.length,
         itemBuilder: (context, index) {
           return AmountWidget(
-                amount: _zakatCalculation.amounts[index],
-                onToggleIncludedInSavings: (isIncluded) => _updateAmount(index, isIncluded),
-            );
+              amount: _zakatCalculation.amounts[index],
+              onToggleIncludedInSavings: (isIncluded) => _updateAmount(index, isIncluded),
+          );
         },
       ),
 
@@ -65,7 +65,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
           onPressed: _addAmount,
           tooltip: 'Add new amount',
           backgroundColor: theme.colorScheme.tertiary,
-          foregroundColor: theme.colorScheme.surfaceBright,
+          foregroundColor: theme.colorScheme.onTertiary,
           child: const Icon(Icons.add),
         ),
     );
