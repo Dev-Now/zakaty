@@ -24,4 +24,14 @@ class Amount {
   bool isSaving() {
     return type == AmountType.saving || includedInSavings;
   }
+
+  Amount copyWith({String? name, AmountType? type, double? value, bool? includedInSavings, String? currency}) {
+    return Amount(
+      name: name ?? this.name,
+      type: type ?? this.type,
+      value: value ?? this.value,
+      includedInSavings: includedInSavings ?? this.includedInSavings,
+      currency: currency ?? this.currency,
+    );
+  }
 }

@@ -15,6 +15,23 @@ class _HomePageState extends State<HomePage> {
   late CalculationSheet _selectedCalculationSheet;
   final ZakatCalculation _exploreCalculationInstance = ZakatCalculation(title: 'Exploration sheet');
 
+  void _setSelectedCalculationSheet(int selected) {
+    setState(() {
+      _selectedCalculationInstance = selected;
+      if(selected >= 1 && (selected - 1) < _calculationInstances.length) {
+        _selectedCalculationSheet = CalculationSheet(
+          key: ValueKey(DateTime.now()),
+          calculationInstance: _calculationInstances[selected - 1]
+        );
+      } else {
+        _selectedCalculationSheet = CalculationSheet(
+          key: ValueKey(DateTime.now()),
+          calculationInstance: _exploreCalculationInstance
+        );
+      }
+    });
+  }
+
   void _addNewCalculationSheet() {
     setState(() {
       final newIndex = _calculationInstances.length + 1;
@@ -30,7 +47,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _copyCalculationSheet() {
-    // !!!TODO...
+    setState(() {
+      final newIndex = _calculationInstances.length + 1;
+      final selectedCalculationInstance = _selectedCalculationSheet.calculationInstance;
+      final copyInstance = ZakatCalculation(
+        title: '${selectedCalculationInstance.title} - COPY',
+        currency: selectedCalculationInstance.currency,
+      );
+      copyInstance.addAmounts(selectedCalculationInstance.copyAmounts());
+      _selectedCalculationInstance = newIndex;
+      _calculationInstances.add(copyInstance);
+      _selectedCalculationSheet = CalculationSheet(
+        key: ValueKey(DateTime.now()),
+        calculationInstance: copyInstance,
+      );
+    });
   }
 
   @override
@@ -73,22 +104,7 @@ class _HomePageState extends State<HomePage> {
                   ),
               ],
               selectedIndex: _selectedCalculationInstance,
-              onDestinationSelected: (value) {
-                setState(() {
-                  _selectedCalculationInstance = value;
-                  if(value >= 1 && (value - 1) < _calculationInstances.length) {
-                    _selectedCalculationSheet = CalculationSheet(
-                      key: ValueKey(DateTime.now()),
-                      calculationInstance: _calculationInstances[value - 1]
-                    );
-                  } else {
-                    _selectedCalculationSheet = CalculationSheet(
-                      key: ValueKey(DateTime.now()),
-                      calculationInstance: _exploreCalculationInstance
-                    );
-                  }
-                });
-              },
+              onDestinationSelected: _setSelectedCalculationSheet,
             ),
           ),
           Expanded(
@@ -98,6 +114,16 @@ class _HomePageState extends State<HomePage> {
       ),
       
       persistentFooterButtons: [
+        IconButton(
+          onPressed: () {}, // !!!TODO...
+          tooltip: 'Configure current calculation sheet',
+          icon: const Icon(Icons.settings_outlined),
+        ),
+        IconButton(
+          onPressed: () {}, // !!!TODO...
+          tooltip: 'Delete current calculation sheet',
+          icon: const Icon(Icons.delete_outline),
+        ),
         IconButton(
           onPressed: _copyCalculationSheet,
           tooltip: 'Copy current calculation sheet',

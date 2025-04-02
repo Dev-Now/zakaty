@@ -38,6 +38,10 @@ class ZakatCalculation {
     }
   }
 
+  List<Amount> copyAmounts() {
+    return amounts.map((amount) => amount.copyWith()).toList();
+  }
+
   String getCalculationSummary() {
     _computeZakat();
     return '$title : Savings = $_totalSavings $currency, Zakat = $_zakat $currency';
