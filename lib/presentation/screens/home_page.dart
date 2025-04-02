@@ -64,6 +64,21 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _deleteCalculationSheet() {
+    setState(() {
+      if (_selectedCalculationInstance == 0) {
+        _exploreCalculationInstance.amounts.clear();
+      } else {
+        _calculationInstances.removeAt(_selectedCalculationInstance - 1);
+      }
+      _selectedCalculationInstance = 0;
+      _selectedCalculationSheet = CalculationSheet(
+        key: ValueKey(DateTime.now()),
+        calculationInstance: _exploreCalculationInstance,
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -124,7 +139,7 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.settings_outlined),
             ),
             IconButton(
-              onPressed: () {}, // !!!TODO...
+              onPressed: _deleteCalculationSheet,
               tooltip: 'Delete current calculation sheet',
               icon: const Icon(Icons.delete_outline),
             ),

@@ -4,12 +4,14 @@ import '../../models/amount.dart';
 class AmountWidget extends StatefulWidget {
   final Amount amount;
   final void Function(bool) onToggleIncludedInSavings;
+  final void Function() onDelete;
 
   const AmountWidget({
     super.key,
     required this.amount,
     required this.onToggleIncludedInSavings,
-    });
+    required this.onDelete,
+  });
 
   @override
   State<AmountWidget> createState() => _AmountWidgetState();
@@ -29,6 +31,10 @@ class _AmountWidgetState extends State<AmountWidget> {
       _isIncludedInSavings = value;
     });
     widget.onToggleIncludedInSavings(value);
+  }
+
+  void _deleteYourself() {
+    widget.onDelete();
   }
 
   @override
@@ -80,7 +86,7 @@ class _AmountWidgetState extends State<AmountWidget> {
                     ),
                   ),
                   IconButton.outlined(
-                    onPressed: () {}, // !!!TODO... 
+                    onPressed: _deleteYourself,
                     icon: const Icon(Icons.delete),
                   )
                 ],

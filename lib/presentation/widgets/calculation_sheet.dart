@@ -57,6 +57,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
           return AmountWidget(
               amount: _zakatCalculation.amounts[index],
               onToggleIncludedInSavings: (isIncluded) => _updateAmount(index, isIncluded),
+              onDelete: () => setState(() { _zakatCalculation.amounts.removeAt(index); }),
           );
         },
       ),
