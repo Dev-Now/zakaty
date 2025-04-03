@@ -7,6 +7,7 @@ class ZakatCalculation {
   
   double _totalSavings = 0.0;
   double _zakat = 0.0;
+  double _zakatToDo = 0.0;
 
   ZakatCalculation({
     required this.title,
@@ -16,6 +17,13 @@ class ZakatCalculation {
   void _computeZakat() {
     _refreshTotalSavings();
     _zakat = _totalSavings / 40;
+    
+    double allAdvanced = 0.0;
+    for (var adv in amounts.where((amount) => amount.type == AmountType.advancedZakatPortion)) {
+      allAdvanced += adv.value;
+    }
+
+    _zakatToDo = _zakat - allAdvanced;
   }
 
   void _refreshTotalSavings() {
@@ -44,7 +52,7 @@ class ZakatCalculation {
 
   String getCalculationSummary() {
     _computeZakat();
-    return '$title : Savings = $_totalSavings $currency, Zakat = $_zakat $currency';
+    return '$title : Savings = $_totalSavings $currency, Zakat = $_zakat $currency, ToDo = $_zakatToDo $currency';
   }
 
   void setIncludeAmountInSavings(int index, bool isIncluded) {

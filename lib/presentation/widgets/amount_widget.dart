@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:zakaty/models/app_config.dart';
 import '../../models/amount.dart';
 
 class AmountWidget extends StatefulWidget {
   final Amount amount;
+  final void Function(Amount) onEditAmount;
   final void Function(bool) onToggleIncludedInSavings;
   final void Function() onDelete;
 
   const AmountWidget({
     super.key,
     required this.amount,
+    required this.onEditAmount,
     required this.onToggleIncludedInSavings,
     required this.onDelete,
   });
@@ -18,18 +22,88 @@ class AmountWidget extends StatefulWidget {
 }
 
 class _AmountWidgetState extends State<AmountWidget> {
-  bool _isIncludedInSavings = true;
+  void _showEditDialog() {
+    final editedAmount = widget.amount;
+    final TextEditingController nameCtrl = TextEditingController(text: editedAmount.name);
+    AmountType selectedType = editedAmount.type;
+    final TextEditingController valueCtrl = TextEditingController(text: editedAmount.value.toString());
+    String selectedCurrency = editedAmount.currency;
 
-  @override
-  void initState() {
-    super.initState();
-    _isIncludedInSavings = widget.amount.includedInSavings;
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Configure amount"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                decoration: InputDecoration(labelText: "Edit name"),
+              ),
+              DropdownButtonFormField<AmountType>(
+                value: selectedType,
+                onChanged: (newValue) {
+                  selectedType = newValue!;
+                },
+                items: AmountType.values.map((option) {
+                  return DropdownMenuItem(
+                    value: option,
+                    child: Text(Amount.fullTypeName(option)),
+                  );
+                }).toList(),
+                decoration: InputDecoration(labelText: "Select type"),
+              ),
+              TextField(
+                controller: valueCtrl,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))],
+                decoration: InputDecoration(labelText: "Edit value"),
+              ),
+              DropdownButtonFormField(
+                value: selectedCurrency,
+                onChanged: (newValue) {
+                  selectedCurrency = newValue!;
+                },
+                items: AppConfig.currencyOptions.map((option) {
+                  return DropdownMenuItem(
+                    value: option,
+                    child: Text(option),
+                  );
+                }).toList(),
+                decoration: InputDecoration(labelText: "Select currency"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _updateAmount(Amount(
+                  name: nameCtrl.text,
+                  type: selectedType,
+                  value: double.parse(valueCtrl.text),
+                  currency: selectedCurrency,
+                  includedInSavings: widget.amount.includedInSavings,
+                ));
+                Navigator.pop(context);
+              },
+              child: Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
+  void _updateAmount(Amount newAmount) {
+    widget.onEditAmount(newAmount);
+  }
+  
   void _toggleIncludedInSavings(bool value) {
-    setState(() {
-      _isIncludedInSavings = value;
-    });
     widget.onToggleIncludedInSavings(value);
   }
 
@@ -74,14 +148,14 @@ class _AmountWidgetState extends State<AmountWidget> {
                   Visibility(
                     visible: widget.amount.type == AmountType.advancedZakatPortion,
                     child: Switch(
-                      value: _isIncludedInSavings,
+                      value: widget.amount.includedInSavings,
                       onChanged: _toggleIncludedInSavings,
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: IconButton.outlined(
-                      onPressed: () {}, // !!!TODO... 
+                      onPressed: _showEditDialog,
                       icon: const Icon(Icons.edit),
                     ),
                   ),

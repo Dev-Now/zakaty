@@ -31,11 +31,25 @@ class _CalculationSheetState extends State<CalculationSheet> {
     });
   }
 
-  void _updateAmount(int index, bool isIncluded) {
+  void _updateAmount(int index, Amount newAmount) {
+    setState(() {
+      _zakatCalculation.amounts[index] = newAmount;
+      _zakatSummary = _zakatCalculation.getCalculationSummary();
+    });
+  }
+
+  void _includeAmountInSavings(int index, bool isIncluded) {
     setState(() {
       _zakatCalculation.setIncludeAmountInSavings(index, isIncluded);
       _zakatSummary = _zakatCalculation.getCalculationSummary();
     });
+  }
+
+  void _deleteAmount(int index) {
+    setState(() {
+      _zakatCalculation.amounts.removeAt(index);
+      _zakatSummary = _zakatCalculation.getCalculationSummary();
+    }); 
   }
 
   @override
@@ -56,8 +70,9 @@ class _CalculationSheetState extends State<CalculationSheet> {
         itemBuilder: (context, index) {
           return AmountWidget(
               amount: _zakatCalculation.amounts[index],
-              onToggleIncludedInSavings: (isIncluded) => _updateAmount(index, isIncluded),
-              onDelete: () => setState(() { _zakatCalculation.amounts.removeAt(index); }),
+              onEditAmount: (newAmount) => _updateAmount(index, newAmount),
+              onToggleIncludedInSavings: (isIncluded) => _includeAmountInSavings(index, isIncluded),
+              onDelete: () => _deleteAmount(index),
           );
         },
       ),

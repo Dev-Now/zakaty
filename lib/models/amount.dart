@@ -15,10 +15,14 @@ class Amount {
     this.currency = 'TND',
   });
 
-  String getFullTypeName() {
+  static String fullTypeName(AmountType type) {
     return type == AmountType.saving
       ? "Savings"
       : "Advanced Zakat";
+  }
+
+  String getFullTypeName() {
+    return fullTypeName(type);
   }
 
   bool isSaving() {

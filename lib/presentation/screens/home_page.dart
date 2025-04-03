@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zakaty/models/app_config.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/calculation_sheet.dart';
 
@@ -13,7 +14,78 @@ class _HomePageState extends State<HomePage> {
   final List<ZakatCalculation> _calculationInstances = [];
   int _selectedCalculationInstance = 0;
   late CalculationSheet _selectedCalculationSheet;
-  final ZakatCalculation _exploreCalculationInstance = ZakatCalculation(title: 'Exploration sheet');
+  ZakatCalculation _exploreCalculationInstance = ZakatCalculation(title: 'Exploration sheet');
+
+  void _showEditDialog() {
+    final selectedCalculationInstance = _selectedCalculationSheet.calculationInstance;
+    final TextEditingController controller = TextEditingController(text: selectedCalculationInstance.title);
+    String selectedCurrency = selectedCalculationInstance.currency;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Configure calculation sheet"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(labelText: "Edit title"),
+              ),
+              DropdownButtonFormField(
+                value: selectedCurrency,
+                onChanged: (newValue) {
+                  selectedCurrency = newValue!;
+                },
+                items: AppConfig.currencyOptions.map((option) {
+                  return DropdownMenuItem(
+                    value: option,
+                    child: Text(option),
+                  );
+                }).toList(),
+                decoration: InputDecoration(labelText: "Select currency"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _updateSelectedCalculation(controller.text, selectedCurrency);
+                Navigator.pop(context);
+              },
+              child: Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _updateSelectedCalculation(String newTitle, String newCurrency) {
+    setState(() {
+      if (_selectedCalculationInstance == 0) {
+        final amountsCopy = _exploreCalculationInstance.copyAmounts();
+        _exploreCalculationInstance = ZakatCalculation(
+          title: "Exploration sheet - $newTitle",
+          currency: newCurrency,
+        );
+        _exploreCalculationInstance.addAmounts(amountsCopy);
+      } else {
+        final amountsCopy = _calculationInstances[_selectedCalculationInstance - 1].copyAmounts();
+        _calculationInstances[_selectedCalculationInstance - 1] = ZakatCalculation(
+          title: newTitle,
+          currency: newCurrency,
+        );
+        _calculationInstances[_selectedCalculationInstance - 1].addAmounts(amountsCopy);
+      }
+      _setSelectedCalculationSheet(_selectedCalculationInstance);
+    });
+  }
 
   void _setSelectedCalculationSheet(int selected) {
     setState(() {
@@ -134,7 +206,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             IconButton(
-              onPressed: () {}, // !!!TODO...
+              onPressed: _showEditDialog,
               tooltip: 'Configure current calculation sheet',
               icon: const Icon(Icons.settings_outlined),
             ),
