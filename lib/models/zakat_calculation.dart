@@ -52,7 +52,7 @@ class ZakatCalculation {
 
   String getCalculationSummary() {
     _computeZakat();
-    return '$title : Savings = $_totalSavings $currency, Zakat = $_zakat $currency, ToDo = $_zakatToDo $currency';
+    return '$title : Savings = ${_totalSavings.toStringAsFixed(3)} $currency, Zakat = ${_zakat.toStringAsFixed(3)} $currency, ToDo = ${_zakatToDo.toStringAsFixed(3)} $currency';
   }
 
   void setIncludeAmountInSavings(int index, bool isIncluded) {

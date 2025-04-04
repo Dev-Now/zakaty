@@ -25,7 +25,10 @@ class _CalculationSheetState extends State<CalculationSheet> {
   void _addAmount() {
     setState(() {
       _zakatCalculation.addAmount(
-        Amount(name: 'Saving ${_zakatCalculation.amounts.length + 1}')
+        Amount(
+          name: 'Saving ${_zakatCalculation.amounts.length + 1}',
+          currency: _zakatCalculation.currency,
+        )
       );
       _zakatSummary = _zakatCalculation.getCalculationSummary();
     });
@@ -62,7 +65,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
       appBar: AppBar(
         backgroundColor: theme.colorScheme.secondary,
         foregroundColor: theme.colorScheme.onSecondary,
-        title: Text(_zakatSummary),
+        title: Tooltip(message: _zakatSummary, child: Text(_zakatSummary)),
       ),
 
       body: ListView.builder(

@@ -147,9 +147,12 @@ class _AmountWidgetState extends State<AmountWidget> {
                 children: [
                   Visibility(
                     visible: widget.amount.type == AmountType.advancedZakatPortion,
-                    child: Switch(
-                      value: widget.amount.includedInSavings,
-                      onChanged: _toggleIncludedInSavings,
+                    child: Tooltip(
+                      message: widget.amount.includedInSavings ? "Exclude from savings" : "Include in savings",
+                      child: Switch(
+                        value: widget.amount.includedInSavings,
+                        onChanged: _toggleIncludedInSavings,
+                      ),
                     ),
                   ),
                   Padding(

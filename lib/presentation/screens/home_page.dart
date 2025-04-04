@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
       if (_selectedCalculationInstance == 0) {
         final amountsCopy = _exploreCalculationInstance.copyAmounts();
         _exploreCalculationInstance = ZakatCalculation(
-          title: "Exploration sheet - $newTitle",
+          title: newTitle,
           currency: newCurrency,
         );
         _exploreCalculationInstance.addAmounts(amountsCopy);
