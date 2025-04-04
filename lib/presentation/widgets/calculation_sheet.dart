@@ -19,40 +19,53 @@ class _CalculationSheetState extends State<CalculationSheet> {
   void initState() {
     super.initState();
     _zakatCalculation = widget.calculationInstance;
-    _zakatSummary = _zakatCalculation.getCalculationSummary();
+    _zakatSummary = "${widget.calculationInstance.title} : Loading. . .";
+    
+    Future.delayed(Duration.zero, _initialize);
   }
 
-  void _addAmount() {
+  void _initialize() async {
+    final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
-      _zakatCalculation.addAmount(
-        Amount(
-          name: 'Saving ${_zakatCalculation.amounts.length + 1}',
-          currency: _zakatCalculation.currency,
-        )
-      );
-      _zakatSummary = _zakatCalculation.getCalculationSummary();
+      _zakatSummary = zakatSummary;
     });
   }
 
-  void _updateAmount(int index, Amount newAmount) {
+  void _addAmount() async {
+    _zakatCalculation.addAmount(
+      Amount(
+        name: 'Saving ${_zakatCalculation.amounts.length + 1}',
+        currency: _zakatCalculation.currency,
+      )
+    );
+    final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
-      _zakatCalculation.amounts[index] = newAmount;
-      _zakatSummary = _zakatCalculation.getCalculationSummary();
+      _zakatSummary = zakatSummary;
     });
   }
 
-  void _includeAmountInSavings(int index, bool isIncluded) {
+  void _updateAmount(int index, Amount newAmount) async {
+    _zakatCalculation.amounts[index] = newAmount;
+    final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
-      _zakatCalculation.setIncludeAmountInSavings(index, isIncluded);
-      _zakatSummary = _zakatCalculation.getCalculationSummary();
+      _zakatSummary = zakatSummary;
     });
   }
 
-  void _deleteAmount(int index) {
+  void _includeAmountInSavings(int index, bool isIncluded) async {
+    _zakatCalculation.setIncludeAmountInSavings(index, isIncluded);
+    final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
-      _zakatCalculation.amounts.removeAt(index);
-      _zakatSummary = _zakatCalculation.getCalculationSummary();
-    }); 
+      _zakatSummary = zakatSummary;
+    });
+  }
+
+  void _deleteAmount(int index) async {
+    _zakatCalculation.amounts.removeAt(index);
+    final zakatSummary = await _zakatCalculation.getCalculationSummary();
+    setState(() async {
+      _zakatSummary = zakatSummary;
+    });
   }
 
   @override

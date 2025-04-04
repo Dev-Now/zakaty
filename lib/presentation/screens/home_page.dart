@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zakaty/models/app_config.dart';
+import 'package:zakaty/config.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/calculation_sheet.dart';
 import 'package:zakaty/presentation/widgets/date_picker.dart';

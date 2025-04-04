@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:zakaty/models/app_config.dart';
+import 'package:zakaty/config.dart';
 import '../../models/amount.dart';
 
 class AmountWidget extends StatefulWidget {

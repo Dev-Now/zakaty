@@ -1,3 +1,4 @@
+import 'package:zakaty/core/conversion_rates.dart';
 import 'package:zakaty/models/amount.dart';
 
 class ZakatCalculation {
@@ -16,26 +17,37 @@ class ZakatCalculation {
     this.dueDate,
   });
 
-  void _computeZakat() {
-    _refreshTotalSavings();
+  Future<void> _computeZakat() async {
+    // get currency conversion rates to this.currency
+    final conversionRates = await ConversionRatesService.getConversionRates(currency, dueDate ?? DateTime.now());
+
+    // refresh savings
+    _refreshTotalSavings(conversionRates);
+    
+    // compute zakat
     _zakat = _totalSavings / 40;
     
     double allAdvanced = 0.0;
     for (var adv in amounts.where((amount) => amount.type == AmountType.advancedZakatPortion)) {
-      allAdvanced += adv.value;
+      allAdvanced += _convertAmountToCalculationCurrency(adv, conversionRates);
     }
 
     _zakatToDo = _zakat - allAdvanced;
   }
 
-  void _refreshTotalSavings() {
+  void _refreshTotalSavings(Map<String, double> conversionRates) {
     _totalSavings = 0.0;
     for (var amount in amounts) {
       if (amount.isSaving()) {
-        // !!!TODO... convert amount if it has different currency!
-        _totalSavings += amount.value;
+        _totalSavings += _convertAmountToCalculationCurrency(amount, conversionRates);
       }
     }
+  }
+
+  double _convertAmountToCalculationCurrency(Amount amount, Map<String, double> conversionRates) {
+    return amount.currency == currency
+      ? amount.value
+      : (1 / conversionRates[amount.currency]!) * amount.value;
   }
 
   void addAmount(Amount amount) {
@@ -52,8 +64,8 @@ class ZakatCalculation {
     return amounts.map((amount) => amount.copyWith()).toList();
   }
 
-  String getCalculationSummary() {
-    _computeZakat();
+  Future<String> getCalculationSummary() async {
+    await _computeZakat();
     return '$title : Savings = ${_totalSavings.toStringAsFixed(3)} $currency, Zakat = ${_zakat.toStringAsFixed(3)} $currency, ToDo = ${_zakatToDo.toStringAsFixed(3)} $currency';
   }
 
