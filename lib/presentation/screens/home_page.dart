@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:zakaty/models/app_config.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/calculation_sheet.dart';
+import 'package:zakaty/presentation/widgets/date_picker.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,6 +21,7 @@ class _HomePageState extends State<HomePage> {
     final selectedCalculationInstance = _selectedCalculationSheet.calculationInstance;
     final TextEditingController controller = TextEditingController(text: selectedCalculationInstance.title);
     String selectedCurrency = selectedCalculationInstance.currency;
+    DateTime selectedDueDate = selectedCalculationInstance.dueDate ?? DateTime.now();
 
     showDialog(
       context: context,
@@ -46,6 +48,13 @@ class _HomePageState extends State<HomePage> {
                 }).toList(),
                 decoration: InputDecoration(labelText: "Select currency"),
               ),
+              DatePicker(
+                label: "Zakat due on",
+                initialDate: selectedDueDate,
+                onDatePicked: (picked) {
+                  selectedDueDate = picked;
+                },
+              ),
             ],
           ),
           actions: [
@@ -55,7 +64,7 @@ class _HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                _updateSelectedCalculation(controller.text, selectedCurrency);
+                _updateSelectedCalculation(controller.text, selectedCurrency, selectedDueDate);
                 Navigator.pop(context);
               },
               child: Text("Save"),
@@ -66,13 +75,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _updateSelectedCalculation(String newTitle, String newCurrency) {
+  void _updateSelectedCalculation(String newTitle, String newCurrency, DateTime newDueDate) {
     setState(() {
       if (_selectedCalculationInstance == 0) {
         final amountsCopy = _exploreCalculationInstance.copyAmounts();
         _exploreCalculationInstance = ZakatCalculation(
           title: newTitle,
           currency: newCurrency,
+          dueDate: newDueDate,
         );
         _exploreCalculationInstance.addAmounts(amountsCopy);
       } else {
@@ -80,6 +90,7 @@ class _HomePageState extends State<HomePage> {
         _calculationInstances[_selectedCalculationInstance - 1] = ZakatCalculation(
           title: newTitle,
           currency: newCurrency,
+          dueDate: newDueDate,
         );
         _calculationInstances[_selectedCalculationInstance - 1].addAmounts(amountsCopy);
       }

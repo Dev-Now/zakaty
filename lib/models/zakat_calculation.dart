@@ -3,6 +3,7 @@ import 'package:zakaty/models/amount.dart';
 class ZakatCalculation {
   final String title;
   final String currency;
+  final DateTime? dueDate;
   final List<Amount> amounts = [];
   
   double _totalSavings = 0.0;
@@ -12,6 +13,7 @@ class ZakatCalculation {
   ZakatCalculation({
     required this.title,
     this.currency = 'TND',
+    this.dueDate,
   });
 
   void _computeZakat() {
