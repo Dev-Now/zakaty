@@ -63,7 +63,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
   void _deleteAmount(int index) async {
     _zakatCalculation.amounts.removeAt(index);
     final zakatSummary = await _zakatCalculation.getCalculationSummary();
-    setState(() async {
+    setState(() {
       _zakatSummary = zakatSummary;
     });
   }
