@@ -30,6 +30,19 @@ class ZakatCalculation {
     required this.dueDate,
   }) : _uid = uid;
 
+  ZakatCalculation editMeta({
+    required newTitle,
+    required newCurrency,
+    required newDueDate,
+  }) {
+    return ZakatCalculation._internal(
+      uid: uid,
+      title: newTitle,
+      currency: newCurrency,
+      dueDate: newDueDate,
+    );
+  }
+
   Future<void> _computeZakat() async {
     // get currency conversion rates to this.currency
     final conversionRates = await ConversionRatesService.getConversionRates(currency, dueDate ?? DateTime.now());

@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:zakaty/config.dart';
+import 'package:zakaty/core/calculations_storage.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/calculation_sheet.dart';
 import 'package:zakaty/presentation/widgets/date_picker.dart';
@@ -12,6 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String _appStatusMessage = '';
   final List<ZakatCalculation> _calculationInstances = [];
   int _selectedCalculationInstance = 0;
   late CalculationSheet _selectedCalculationSheet;
@@ -87,11 +91,12 @@ class _HomePageState extends State<HomePage> {
         _exploreCalculationInstance.addAmounts(amountsCopy);
       } else {
         final amountsCopy = _calculationInstances[_selectedCalculationInstance - 1].copyAmounts();
-        _calculationInstances[_selectedCalculationInstance - 1] = ZakatCalculation(
-          title: newTitle,
-          currency: newCurrency,
-          dueDate: newDueDate,
-        );
+        _calculationInstances[_selectedCalculationInstance - 1]
+          = _calculationInstances[_selectedCalculationInstance - 1].editMeta(
+            newTitle: newTitle,
+            newCurrency: newCurrency,
+            newDueDate: newDueDate,
+          );
         _calculationInstances[_selectedCalculationInstance - 1].saveMe = true;
         _calculationInstances[_selectedCalculationInstance - 1].addAmounts(amountsCopy);
       }
@@ -171,8 +176,8 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _saveCalculationSheet() {
-    // !!!TODO...
+  void _saveCalculationSheet() async {
+    await ZakatCalculationsStorageService.saveZakatCalculation(_selectedCalculationSheet.calculationInstance);
     _setSaveMeForSelectedCalculationSheet(false);
   }
 
@@ -191,6 +196,33 @@ class _HomePageState extends State<HomePage> {
       calculationInstance: _exploreCalculationInstance,
       onEdited: () => { /** do nothing */ },
     );
+    _appStatusMessage = 'Loading saved calculation sheets. . .';
+
+    Future.delayed(Duration.zero, _initialize);
+  }
+
+  void _initialize() async {
+    final wd = Directory(AppConfig.workingDirectory);
+    final files = wd. listSync().whereType<File>().where((file) => file.path.endsWith('.json'));
+    
+    final savedCalculationInstances = [];
+
+    for (var file in files) {
+      try {
+        savedCalculationInstances.add(
+          await ZakatCalculationsStorageService.loadZakatCalculation(file)
+        );
+      } catch(e) {
+        // !!!TODO... log the exception here
+      }
+    }
+
+    setState(() {
+      for(final calc in savedCalculationInstances) {
+        _calculationInstances.add(calc);
+      }
+      _appStatusMessage = '';
+    });
   }
 
   @override
@@ -202,7 +234,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: theme.colorScheme.inversePrimary,
         foregroundColor: theme.colorScheme.primary,
         title: Text(
-          'Zakat Calculator',
+          'Zakat Calculator ${(_appStatusMessage.isEmpty ? '' : ' - $_appStatusMessage')}',
           style: TextStyle(fontWeight: FontWeight.bold)
           ),
       ),
