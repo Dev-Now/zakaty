@@ -38,4 +38,36 @@ class Amount {
       currency: currency ?? this.currency,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'type': type.toString(),
+      'value': value,
+      'includedInSavings': includedInSavings,
+      'currency': currency,
+    };
+  }
+
+  static Amount fromJson(Map<String, dynamic> json) {
+    return Amount(
+      name: json['name'],
+      type: _amountTypeFromString(json['type']),
+      value: (json['value'] as num).toDouble(),
+      includedInSavings: json['includedInSavings'] ?? true,
+      currency: json['currency'],
+    );
+  }
+}
+
+// Helper function for parsing AmountType enum
+AmountType _amountTypeFromString(String typeString) {
+  switch (typeString) {
+    case 'AmountType.saving':
+      return AmountType.saving;
+    case 'AmountType.advancedZakatPortion':
+      return AmountType.advancedZakatPortion;
+    default:
+      return AmountType.saving;
+  }
 }

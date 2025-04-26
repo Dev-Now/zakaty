@@ -92,6 +92,7 @@ class _HomePageState extends State<HomePage> {
           currency: newCurrency,
           dueDate: newDueDate,
         );
+        _calculationInstances[_selectedCalculationInstance - 1].saveMe = true;
         _calculationInstances[_selectedCalculationInstance - 1].addAmounts(amountsCopy);
       }
       _setSelectedCalculationSheet(_selectedCalculationInstance);
@@ -104,12 +105,14 @@ class _HomePageState extends State<HomePage> {
       if(selected >= 1 && (selected - 1) < _calculationInstances.length) {
         _selectedCalculationSheet = CalculationSheet(
           key: ValueKey(DateTime.now()),
-          calculationInstance: _calculationInstances[selected - 1]
+          calculationInstance: _calculationInstances[selected - 1],
+          onEdited: () => _setSaveMeForSelectedCalculationSheet(true),
         );
       } else {
         _selectedCalculationSheet = CalculationSheet(
           key: ValueKey(DateTime.now()),
-          calculationInstance: _exploreCalculationInstance
+          calculationInstance: _exploreCalculationInstance,
+          onEdited: () => { /** do nothing */ },
         );
       }
     });
@@ -121,11 +124,14 @@ class _HomePageState extends State<HomePage> {
       final calculationInstance = ZakatCalculation(
         title: 'ZAKAT $newIndex'
       );
+      calculationInstance.saveMe = true;
       _calculationInstances.add(calculationInstance);
       _selectedCalculationInstance = newIndex;
       _selectedCalculationSheet = CalculationSheet(
         key: ValueKey(DateTime.now()),
-        calculationInstance: calculationInstance);
+        calculationInstance: calculationInstance,
+        onEdited: () => _setSaveMeForSelectedCalculationSheet(true),
+      );
     });
   }
 
@@ -137,12 +143,14 @@ class _HomePageState extends State<HomePage> {
         title: '${selectedCalculationInstance.title} - COPY',
         currency: selectedCalculationInstance.currency,
       );
+      copyInstance.saveMe = true;
       copyInstance.addAmounts(selectedCalculationInstance.copyAmounts());
       _calculationInstances.add(copyInstance);
       _selectedCalculationInstance = newIndex;
       _selectedCalculationSheet = CalculationSheet(
         key: ValueKey(DateTime.now()),
         calculationInstance: copyInstance,
+        onEdited: () => _setSaveMeForSelectedCalculationSheet(true),
       );
     });
   }
@@ -158,15 +166,30 @@ class _HomePageState extends State<HomePage> {
       _selectedCalculationSheet = CalculationSheet(
         key: ValueKey(DateTime.now()),
         calculationInstance: _exploreCalculationInstance,
+        onEdited: () => { /** do nothing */ },
       );
     });
   }
 
+  void _saveCalculationSheet() {
+    // !!!TODO...
+    _setSaveMeForSelectedCalculationSheet(false);
+  }
+
+  void _setSaveMeForSelectedCalculationSheet(bool newState) {
+    if (_selectedCalculationInstance != 0) {
+      setState(() {
+        _calculationInstances[_selectedCalculationInstance - 1].saveMe = newState;     
+      });
+    }
+  }
+  
   @override
   void initState() {
     super.initState();
     _selectedCalculationSheet = CalculationSheet(
-      calculationInstance: _exploreCalculationInstance
+      calculationInstance: _exploreCalculationInstance,
+      onEdited: () => { /** do nothing */ },
     );
   }
 
@@ -191,9 +214,18 @@ class _HomePageState extends State<HomePage> {
             child: ListView.builder(
               itemCount: _calculationInstances.length + 1,
               itemBuilder: (context, index) {
+                final calcInstance = index == 0 ? _exploreCalculationInstance : _calculationInstances[index - 1];
+
                 return ListTile(
                   leading: Icon(index == 0 ? Icons.query_stats : Icons.calculate),
-                  title: Text(index == 0 ? _exploreCalculationInstance.title : _calculationInstances[index - 1].title),
+                  title: Text(calcInstance.title),
+                  trailing: Visibility(
+                    visible: index != 0,
+                    child: Icon(
+                      Icons.save,
+                      color: calcInstance.saveMe ? theme.colorScheme.error : theme.colorScheme.primary,
+                    ),
+                  ),
                   selected: _selectedCalculationInstance == index,
                   iconColor: theme.colorScheme.inversePrimary,
                   textColor: theme.colorScheme.inversePrimary,
@@ -235,6 +267,11 @@ class _HomePageState extends State<HomePage> {
               onPressed: _addNewCalculationSheet,
               tooltip: 'Add new calculation sheet',
               icon: const Icon(Icons.add_chart_outlined),
+            ),
+            IconButton(
+              onPressed: _saveCalculationSheet,
+              tooltip: 'Save current calculation sheet',
+              icon: const Icon(Icons.save_outlined),
             ),
           ],
         ),

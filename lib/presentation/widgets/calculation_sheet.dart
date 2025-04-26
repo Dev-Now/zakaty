@@ -5,7 +5,9 @@ import 'package:zakaty/presentation/widgets/amount_widget.dart';
 
 class CalculationSheet extends StatefulWidget {
   final ZakatCalculation calculationInstance;
-  const CalculationSheet({super.key, required this.calculationInstance});
+  final void Function() onEdited;
+
+  const CalculationSheet({super.key, required this.calculationInstance, required this.onEdited});
 
   @override
   State<CalculationSheet> createState() => _CalculationSheetState();
@@ -38,6 +40,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
         currency: _zakatCalculation.currency,
       )
     );
+    widget.onEdited();
     final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
       _zakatSummary = zakatSummary;
@@ -46,6 +49,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
 
   void _updateAmount(int index, Amount newAmount) async {
     _zakatCalculation.amounts[index] = newAmount;
+    widget.onEdited();
     final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
       _zakatSummary = zakatSummary;
@@ -54,6 +58,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
 
   void _includeAmountInSavings(int index, bool isIncluded) async {
     _zakatCalculation.setIncludeAmountInSavings(index, isIncluded);
+    widget.onEdited();
     final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
       _zakatSummary = zakatSummary;
@@ -62,6 +67,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
 
   void _deleteAmount(int index) async {
     _zakatCalculation.amounts.removeAt(index);
+    widget.onEdited();
     final zakatSummary = await _zakatCalculation.getCalculationSummary();
     setState(() {
       _zakatSummary = zakatSummary;

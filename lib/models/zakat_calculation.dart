@@ -1,7 +1,9 @@
+import 'package:uuid/uuid.dart';
 import 'package:zakaty/core/conversion_rates.dart';
 import 'package:zakaty/models/amount.dart';
 
 class ZakatCalculation {
+  final String _uid;
   final String title;
   final String currency;
   final DateTime? dueDate;
@@ -11,11 +13,22 @@ class ZakatCalculation {
   double _zakat = 0.0;
   double _zakatToDo = 0.0;
 
+  bool saveMe = false;
+
+  String get uid => _uid;
+
   ZakatCalculation({
     required this.title,
     this.currency = 'TND',
     this.dueDate,
-  });
+  }) : _uid = const Uuid().v4();
+
+  ZakatCalculation._internal({
+    required String uid,
+    required this.title,
+    required this.currency,
+    required this.dueDate,
+  }) : _uid = uid;
 
   Future<void> _computeZakat() async {
     // get currency conversion rates to this.currency
@@ -77,5 +90,30 @@ class ZakatCalculation {
         includedInSavings: isIncluded,
         currency: amounts[index].currency,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uid': _uid,
+      'title': title,
+      'currency': currency,
+      'dueDate': dueDate?.toIso8601String(),
+      'amounts': amounts.map((amount) => amount.toJson()).toList(),
+    };
+  }
+
+  static ZakatCalculation fromJson(Map<String, dynamic> json) {
+    final zakatCalculation = ZakatCalculation._internal(
+      uid: json['uid'],
+      title: json['title'],
+      currency: json['currency'],
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+    );
+    zakatCalculation.addAmounts(
+      (json['amounts'] as List)
+        .map((amountJson) => Amount.fromJson(amountJson))
+        .toList(),
+    );
+    return zakatCalculation;
   }
 }
