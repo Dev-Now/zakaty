@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _appStatusMessage = '';
+  String _calculationsLoadingMsg = '';
   final List<ZakatCalculation> _calculationInstances = [];
   int _selectedCalculationInstance = 0;
   late CalculationSheet _selectedCalculationSheet;
@@ -196,7 +196,7 @@ class _HomePageState extends State<HomePage> {
       calculationInstance: _exploreCalculationInstance,
       onEdited: () => { /** do nothing */ },
     );
-    _appStatusMessage = 'Loading saved calculation sheets. . .';
+    _calculationsLoadingMsg = 'Loading saved sheets. . .';
 
     Future.delayed(Duration.zero, _initialize);
   }
@@ -221,20 +221,21 @@ class _HomePageState extends State<HomePage> {
       for(final calc in savedCalculationInstances) {
         _calculationInstances.add(calc);
       }
-      _appStatusMessage = '';
+      _calculationsLoadingMsg = '';
     });
   }
 
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var calculationsLoadingInProgress = _calculationsLoadingMsg.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: theme.colorScheme.inversePrimary,
         foregroundColor: theme.colorScheme.primary,
         title: Text(
-          'Zakat Calculator ${(_appStatusMessage.isEmpty ? '' : ' - $_appStatusMessage')}',
+          'Zakat Calculator',
           style: TextStyle(fontWeight: FontWeight.bold)
           ),
       ),
@@ -244,28 +245,48 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             width: 350,
             child: ListView.builder(
-              itemCount: _calculationInstances.length + 1,
+              itemCount: 1 + (calculationsLoadingInProgress ? 1 : _calculationInstances.length),
               itemBuilder: (context, index) {
-                final calcInstance = index == 0 ? _exploreCalculationInstance : _calculationInstances[index - 1];
-
-                return ListTile(
-                  leading: Icon(index == 0 ? Icons.query_stats : Icons.calculate),
-                  title: Text(calcInstance.title),
-                  trailing: Visibility(
-                    visible: index != 0,
-                    child: Icon(
-                      Icons.save,
-                      color: calcInstance.saveMe ? theme.colorScheme.error : theme.colorScheme.primary,
-                    ),
-                  ),
-                  selected: _selectedCalculationInstance == index,
-                  iconColor: theme.colorScheme.inversePrimary,
-                  textColor: theme.colorScheme.inversePrimary,
-                  tileColor: theme.colorScheme.surfaceContainer,
-                  selectedColor: theme.colorScheme.onPrimaryContainer,
-                  selectedTileColor: theme.colorScheme.primaryContainer,
-                  onTap: () => _setSelectedCalculationSheet(index),
-                );
+                if (index == 0) {
+                  return ListTile(
+                    leading: Icon(Icons.query_stats),
+                    title: Text(_exploreCalculationInstance.title),
+                    selected: _selectedCalculationInstance == index,
+                    iconColor: theme.colorScheme.inversePrimary,
+                    textColor: theme.colorScheme.inversePrimary,
+                    tileColor: theme.colorScheme.surfaceContainer,
+                    selectedColor: theme.colorScheme.onPrimaryContainer,
+                    selectedTileColor: theme.colorScheme.primaryContainer,
+                    onTap: () => _setSelectedCalculationSheet(index),
+                  );
+                } else {
+                  if (calculationsLoadingInProgress) {
+                    return ListTile(
+                      title: Text(_calculationsLoadingMsg),
+                      leading: CircularProgressIndicator(),
+                      textColor: theme.colorScheme.inversePrimary,
+                      tileColor: theme.colorScheme.surfaceContainer,
+                    );
+                  } else {
+                    final calcInstance = _calculationInstances[index - 1];
+                    
+                    return ListTile(
+                      leading: Icon(Icons.calculate),
+                      title: Text(calcInstance.title),
+                      trailing: Icon(
+                        Icons.save,
+                        color: calcInstance.saveMe ? theme.colorScheme.error : theme.colorScheme.primary,
+                      ),
+                      selected: _selectedCalculationInstance == index,
+                      iconColor: theme.colorScheme.inversePrimary,
+                      textColor: theme.colorScheme.inversePrimary,
+                      tileColor: theme.colorScheme.surfaceContainer,
+                      selectedColor: theme.colorScheme.onPrimaryContainer,
+                      selectedTileColor: theme.colorScheme.primaryContainer,
+                      onTap: () => _setSelectedCalculationSheet(index),
+                    );
+                  }
+                }
               },
             ),
           ),
