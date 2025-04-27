@@ -163,20 +163,55 @@ class _HomePageState extends State<HomePage> with WindowListener {
     });
   }
 
-  void _deleteCalculationSheet() {
-    setState(() {
-      if (_selectedCalculationInstance == 0) {
-        _exploreCalculationInstance.amounts.clear();
-      } else {
-        _calculationInstances.removeAt(_selectedCalculationInstance - 1);
+  Future<bool?> _showDeleteDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete calculation sheet?'),
+          content: const Text('You are about to delete the selected calculation sheet including all previously saved data. Proceed?'),
+          actions: [
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () async {
+                Navigator.pop(context, true);
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+            ),
+          ]
+        );
       }
-      _selectedCalculationInstance = 0;
-      _selectedCalculationSheet = CalculationSheet(
-        key: ValueKey(DateTime.now()),
-        calculationInstance: _exploreCalculationInstance,
-        onEdited: () => { /** do nothing */ },
-      );
-    });
+    );
+  }
+
+  void _deleteCalculationSheet() async {
+    bool deleteExplorationSheet = _selectedCalculationInstance == 0;
+    bool deleteConfirmed = deleteExplorationSheet || (await _showDeleteDialog() ?? false);
+
+    if (deleteConfirmed) {
+      if (!deleteExplorationSheet) {
+        ZakatCalculationsStorageService.deleteZakatCalculation(_calculationInstances[_selectedCalculationInstance - 1].uid);
+      }
+      
+      setState(() {
+        if (deleteExplorationSheet) {
+          _exploreCalculationInstance.amounts.clear();
+        } else {
+          _calculationInstances.removeAt(_selectedCalculationInstance - 1);
+        }
+        _selectedCalculationInstance = 0;
+        _selectedCalculationSheet = CalculationSheet(
+          key: ValueKey(DateTime.now()),
+          calculationInstance: _exploreCalculationInstance,
+          onEdited: () => { /** do nothing */ },
+        );
+      });
+    }
   }
 
   void _saveCalculationSheet() async {

@@ -20,4 +20,14 @@ class ZakatCalculationsStorageService {
       throw Exception('Error loading ${calculationFile.path}: $e');
     }
   }
+
+  static Future<void> deleteZakatCalculation(String uid) async {
+    final file = File('${AppConfig.workingDirectory}/$uid.json');
+    try {
+      await file.delete();
+    } catch(e) {
+      // !!!TODO... log error properly
+      print('Error loading ${file.path}: $e');
+    }
+  }
 }
