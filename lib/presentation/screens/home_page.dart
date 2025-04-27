@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:zakaty/config.dart';
 import 'package:zakaty/core/calculations_storage.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/calculation_sheet.dart';
 import 'package:zakaty/presentation/widgets/date_picker.dart';
+
+enum ExitOption { saveAndExit, exitWithoutSaving, cancelExit }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,7 +17,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WindowListener {
   String _calculationsLoadingMsg = '';
   final List<ZakatCalculation> _calculationInstances = [];
   int _selectedCalculationInstance = 0;
@@ -192,6 +195,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    windowManager.addListener(this);
     _selectedCalculationSheet = CalculationSheet(
       calculationInstance: _exploreCalculationInstance,
       onEdited: () => { /** do nothing */ },
@@ -199,6 +203,12 @@ class _HomePageState extends State<HomePage> {
     _calculationsLoadingMsg = 'Loading saved sheets. . .';
 
     Future.delayed(Duration.zero, _initialize);
+  }
+
+  @override
+  void dispose() {
+    windowManager.removeListener(this);
+    super.dispose();
   }
 
   void _initialize() async {
@@ -230,53 +240,44 @@ class _HomePageState extends State<HomePage> {
     var theme = Theme.of(context);
     var calculationsLoadingInProgress = _calculationsLoadingMsg.isNotEmpty;
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: theme.colorScheme.inversePrimary,
-        foregroundColor: theme.colorScheme.primary,
-        title: Text(
-          'Zakat Calculator',
-          style: TextStyle(fontWeight: FontWeight.bold)
-          ),
-      ),
-
-      body: Row(
-        children: [
-          SizedBox(
-            width: 350,
-            child: ListView.builder(
-              itemCount: 1 + (calculationsLoadingInProgress ? 1 : _calculationInstances.length),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return ListTile(
-                    leading: Icon(Icons.query_stats),
-                    title: Text(_exploreCalculationInstance.title),
-                    selected: _selectedCalculationInstance == index,
-                    iconColor: theme.colorScheme.inversePrimary,
-                    textColor: theme.colorScheme.inversePrimary,
-                    tileColor: theme.colorScheme.surfaceContainer,
-                    selectedColor: theme.colorScheme.onPrimaryContainer,
-                    selectedTileColor: theme.colorScheme.primaryContainer,
-                    onTap: () => _setSelectedCalculationSheet(index),
-                  );
-                } else {
-                  if (calculationsLoadingInProgress) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) {
+          return;
+        }
+        bool nothingToSave = _nothingToSave();
+        final exitOption = nothingToSave
+          ? ExitOption.exitWithoutSaving
+          : await _showExitDialog(context) ?? ExitOption.cancelExit;
+        if (exitOption == ExitOption.saveAndExit) {
+          await _saveAllUnsavedCalculations();
+        }
+        if (context.mounted && exitOption != ExitOption.cancelExit) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: theme.colorScheme.inversePrimary,
+          foregroundColor: theme.colorScheme.primary,
+          title: Text(
+            'Zakat Calculator',
+            style: TextStyle(fontWeight: FontWeight.bold)
+            ),
+        ),
+      
+        body: Row(
+          children: [
+            SizedBox(
+              width: 350,
+              child: ListView.builder(
+                itemCount: 1 + (calculationsLoadingInProgress ? 1 : _calculationInstances.length),
+                itemBuilder: (context, index) {
+                  if (index == 0) {
                     return ListTile(
-                      title: Text(_calculationsLoadingMsg),
-                      leading: CircularProgressIndicator(),
-                      textColor: theme.colorScheme.inversePrimary,
-                      tileColor: theme.colorScheme.surfaceContainer,
-                    );
-                  } else {
-                    final calcInstance = _calculationInstances[index - 1];
-                    
-                    return ListTile(
-                      leading: Icon(Icons.calculate),
-                      title: Text(calcInstance.title),
-                      trailing: Icon(
-                        Icons.save,
-                        color: calcInstance.saveMe ? theme.colorScheme.error : theme.colorScheme.primary,
-                      ),
+                      leading: Icon(Icons.query_stats),
+                      title: Text(_exploreCalculationInstance.title),
                       selected: _selectedCalculationInstance == index,
                       iconColor: theme.colorScheme.inversePrimary,
                       textColor: theme.colorScheme.inversePrimary,
@@ -285,50 +286,134 @@ class _HomePageState extends State<HomePage> {
                       selectedTileColor: theme.colorScheme.primaryContainer,
                       onTap: () => _setSelectedCalculationSheet(index),
                     );
+                  } else {
+                    if (calculationsLoadingInProgress) {
+                      return ListTile(
+                        title: Text(_calculationsLoadingMsg),
+                        leading: CircularProgressIndicator(),
+                        textColor: theme.colorScheme.inversePrimary,
+                        tileColor: theme.colorScheme.surfaceContainer,
+                      );
+                    } else {
+                      final calcInstance = _calculationInstances[index - 1];
+                      
+                      return ListTile(
+                        leading: Icon(Icons.calculate),
+                        title: Text(calcInstance.title),
+                        trailing: Icon(
+                          Icons.save,
+                          color: calcInstance.saveMe ? theme.colorScheme.error : theme.colorScheme.primary,
+                        ),
+                        selected: _selectedCalculationInstance == index,
+                        iconColor: theme.colorScheme.inversePrimary,
+                        textColor: theme.colorScheme.inversePrimary,
+                        tileColor: theme.colorScheme.surfaceContainer,
+                        selectedColor: theme.colorScheme.onPrimaryContainer,
+                        selectedTileColor: theme.colorScheme.primaryContainer,
+                        onTap: () => _setSelectedCalculationSheet(index),
+                      );
+                    }
                   }
-                }
-              },
+                },
+              ),
             ),
-          ),
-          Expanded(
-            child: _selectedCalculationSheet,
-          ),
-        ],
-      ),
-      
-      bottomNavigationBar: BottomAppBar(
-        color: theme.colorScheme.surfaceContainer,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconButton(
-              onPressed: _showEditDialog,
-              tooltip: 'Configure current calculation sheet',
-              icon: const Icon(Icons.settings_outlined),
-            ),
-            IconButton(
-              onPressed: _deleteCalculationSheet,
-              tooltip: 'Delete current calculation sheet',
-              icon: const Icon(Icons.delete_outline),
-            ),
-            IconButton(
-              onPressed: _copyCalculationSheet,
-              tooltip: 'Copy current calculation sheet',
-              icon: const Icon(Icons.copy_outlined),
-            ),
-            IconButton(
-              onPressed: _addNewCalculationSheet,
-              tooltip: 'Add new calculation sheet',
-              icon: const Icon(Icons.add_chart_outlined),
-            ),
-            IconButton(
-              onPressed: _saveCalculationSheet,
-              tooltip: 'Save current calculation sheet',
-              icon: const Icon(Icons.save_outlined),
+            Expanded(
+              child: _selectedCalculationSheet,
             ),
           ],
         ),
+        
+        bottomNavigationBar: BottomAppBar(
+          color: theme.colorScheme.surfaceContainer,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                onPressed: _showEditDialog,
+                tooltip: 'Configure current calculation sheet',
+                icon: const Icon(Icons.settings_outlined),
+              ),
+              IconButton(
+                onPressed: _deleteCalculationSheet,
+                tooltip: 'Delete current calculation sheet',
+                icon: const Icon(Icons.delete_outline),
+              ),
+              IconButton(
+                onPressed: _copyCalculationSheet,
+                tooltip: 'Copy current calculation sheet',
+                icon: const Icon(Icons.copy_outlined),
+              ),
+              IconButton(
+                onPressed: _addNewCalculationSheet,
+                tooltip: 'Add new calculation sheet',
+                icon: const Icon(Icons.add_chart_outlined),
+              ),
+              IconButton(
+                onPressed: _saveCalculationSheet,
+                tooltip: 'Save current calculation sheet',
+                icon: const Icon(Icons.save_outlined),
+              ),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+
+  @override
+  void onWindowClose() async {
+    bool nothingToSave = _nothingToSave();
+    if (nothingToSave) {
+      windowManager.destroy();
+    }
+    final exitOption = await _showExitDialog(context) ?? ExitOption.cancelExit;
+    if (exitOption == ExitOption.saveAndExit) {
+      await _saveAllUnsavedCalculations();
+    }
+    if (exitOption != ExitOption.cancelExit) {
+      windowManager.destroy();
+    }
+  }
+
+  bool _nothingToSave() {
+    return _calculationInstances.every((calc) => !calc.saveMe);
+  }
+
+  Future<void> _saveAllUnsavedCalculations() async {
+    for(var calcToSave in _calculationInstances.where((calc) => calc.saveMe)) {
+      await ZakatCalculationsStorageService.saveZakatCalculation(calcToSave);
+    }
+  }
+
+  Future<ExitOption?> _showExitDialog(BuildContext context) async {
+    return showDialog<ExitOption>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Unsaved changes!'),
+          content: const Text('You have unsaved changes. Save them all before leaving?'),
+          actions: [
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () async {
+                Navigator.pop(context, ExitOption.saveAndExit);
+              },
+            ),
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.pop(context, ExitOption.exitWithoutSaving);
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context, ExitOption.cancelExit);
+              },
+            ),
+          ]
+        );
+      }
     );
   }
 }
