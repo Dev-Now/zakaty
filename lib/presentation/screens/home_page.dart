@@ -7,6 +7,7 @@ import 'package:zakaty/core/calculations_storage.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/calculation_sheet.dart';
 import 'package:zakaty/presentation/widgets/date_picker.dart';
+import 'package:zakaty/utils/logger.dart';
 
 enum ExitOption { saveAndExit, exitWithoutSaving, cancelExit }
 
@@ -242,6 +243,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
 
   @override
   void dispose() {
+    disposeLogging();
     windowManager.removeListener(this);
     super.dispose();
   }
@@ -252,15 +254,18 @@ class _HomePageState extends State<HomePage> with WindowListener {
     
     final savedCalculationInstances = [];
 
+    var failedCount = 0;
     for (var file in files) {
       try {
         savedCalculationInstances.add(
           await ZakatCalculationsStorageService.loadZakatCalculation(file)
         );
-      } catch(e) {
-        // !!!TODO... log the exception here
+      } catch(_) {
+        failedCount++;
       }
     }
+
+    if (!mounted) return;
 
     setState(() {
       for(final calc in savedCalculationInstances) {
@@ -268,6 +273,17 @@ class _HomePageState extends State<HomePage> with WindowListener {
       }
       _calculationsLoadingMsg = '';
     });
+
+    if (failedCount > 0) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Failed to load $failedCount calculation sheet${failedCount > 1 ? 's' : ''}.'),
+          actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
+        ),
+      );
+    }
   }
 
   @override
