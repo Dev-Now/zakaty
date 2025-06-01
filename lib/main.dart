@@ -6,7 +6,7 @@ import 'package:zakaty/utils/logger.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  setupLogging();
+  await setupLogging();
 
   await windowManager.ensureInitialized();
   windowManager.setPreventClose(true);

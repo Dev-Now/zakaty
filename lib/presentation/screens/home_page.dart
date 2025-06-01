@@ -271,6 +271,7 @@ class _HomePageState extends State<HomePage> with WindowListener {
       for(final calc in savedCalculationInstances) {
         _calculationInstances.add(calc);
       }
+      _calculationInstances.sort((a, b) => a.title.compareTo(b.title));
       _calculationsLoadingMsg = '';
     });
 
