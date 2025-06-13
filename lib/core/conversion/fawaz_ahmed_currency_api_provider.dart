@@ -11,7 +11,7 @@ class FawazAhmedCurrencyApiProvider implements IConversionRatesProvider {
 
   @override
   Future<Map<String, double>> getConversionRates(String targetCurrency, DateTime targetDate) async {
-    final String dateStr = targetDate.isBefore(DateTime.now())
+    final String dateStr = targetDate.isBefore(DateTime.now().subtract(Duration(days: 1)))
       ? targetDate.toIso8601String().split('T').first
       : 'latest';
     
@@ -35,10 +35,10 @@ class FawazAhmedCurrencyApiProvider implements IConversionRatesProvider {
           }
         }
       } else {
-        logger.severe('Failed to load data. Status code: ${response.statusCode}');
+        logger.severe('FawazAhmedCurrencyApiProvider >> Failed to load data. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      logger.severe('Error fetching data: $e');
+      logger.severe('FawazAhmedCurrencyApiProvider >> Error fetching data: $e');
     }
 
     return result;
