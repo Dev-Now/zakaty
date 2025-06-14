@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zakaty/config.dart';
 import 'package:zakaty/core/calculations_storage.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
+import 'package:zakaty/presentation/widgets/about_panel.dart';
 import 'package:zakaty/presentation/widgets/calculation_sheet.dart';
 import 'package:zakaty/presentation/widgets/date_picker.dart';
 import 'package:zakaty/utils/logger.dart';
@@ -313,6 +315,20 @@ class _HomePageState extends State<HomePage> with WindowListener {
         appBar: AppBar(
           backgroundColor: theme.colorScheme.inversePrimary,
           foregroundColor: theme.colorScheme.primary,
+          leading: IconButton(
+            icon: SvgPicture.asset('assets/icons/logo.svg'),
+            tooltip: 'About Zakaty',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Zakaty App'),
+                  content: AboutPanel(),
+                  actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
+                ),
+              );
+            },
+          ),
           title: Text(
             'Zakat Calculator',
             style: TextStyle(fontWeight: FontWeight.bold)
