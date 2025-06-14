@@ -68,4 +68,12 @@ class ConversionRatesService {
 
     return true;
   }
+
+  static Future<void> saveCachedConversionRates() async {
+    await _cacheProvider.saveToDisk();
+  }
+
+  static Future<void> loadCachedConversionRates() async {
+    await _cacheProvider.loadFromDisk();
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zakaty/core/conversion_rates.dart';
 import 'package:zakaty/models/amount.dart';
 import 'package:zakaty/models/zakat_calculation.dart';
 import 'package:zakaty/presentation/widgets/amount_widget.dart';
@@ -28,6 +29,7 @@ class _CalculationSheetState extends State<CalculationSheet> {
 
   void _initialize() async {
     final zakatSummary = await _zakatCalculation.getCalculationSummary();
+    await ConversionRatesService.saveCachedConversionRates();
     setState(() {
       _zakatSummary = zakatSummary;
     });

@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 import 'package:zakaty/core/conversion_rates.dart';
 import 'package:zakaty/models/amount.dart';
+import 'package:zakaty/utils/date_only.dart';
 
 class ZakatCalculation {
   final String _uid;
@@ -45,7 +46,7 @@ class ZakatCalculation {
 
   Future<void> _computeZakat() async {
     // get currency conversion rates to this.currency
-    final conversionRates = await ConversionRatesService.getConversionRates(currency, dueDate ?? DateTime.now());
+    final conversionRates = await ConversionRatesService.getConversionRates(currency, dueDate ?? DateTime.now().atMidnight);
 
     // refresh savings
     _refreshTotalSavings(conversionRates);
