@@ -36,7 +36,12 @@ class AboutPanel extends StatelessWidget {
               ),
             ),
             const Divider(height: 24),
-            SizedBox(height: maxHeight * 0.4, child: MarkdownWidget(data: instructions)),
+            SizedBox(
+              height: maxHeight * 0.4,
+              child: MarkdownWidget(
+                data: instructions,
+              ),
+            ),
           ],
         ),
       ),
