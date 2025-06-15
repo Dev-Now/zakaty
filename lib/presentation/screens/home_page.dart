@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:zakaty/config.dart';
 import 'package:zakaty/core/calculations_storage.dart';
@@ -316,14 +316,19 @@ class _HomePageState extends State<HomePage> with WindowListener {
           backgroundColor: theme.colorScheme.inversePrimary,
           foregroundColor: theme.colorScheme.primary,
           leading: IconButton(
-            icon: SvgPicture.asset('assets/icons/logo.svg'),
+            icon: Image.asset('assets/icons/logo.png'),
             tooltip: 'About Zakaty',
-            onPressed: () {
+            onPressed: () async {
+              final instructionsText = await rootBundle.loadString('assets/instructions.md');
+              
+              if (!context.mounted) return;
+
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
+                  icon: Image.asset('assets/icons/logo.png', width: 128, height: 128),
                   title: Text('Zakaty App'),
-                  content: AboutPanel(),
+                  content: AboutPanel(instructions: instructionsText),
                   actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
                 ),
               );
