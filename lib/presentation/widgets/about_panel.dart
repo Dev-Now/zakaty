@@ -21,6 +21,9 @@ class AboutPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Zakaty App - version 1.0.0', style: Theme.of(context).textTheme.headlineSmall),
+            Text('Release Date: 2025-08-30', style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 10),
             Text('Zakat calculator supporting multi-currency conversion.'),
             const SizedBox(height: 8),
             RichText(
