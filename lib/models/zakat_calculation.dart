@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'package:zakaty/config.dart';
 import 'package:zakaty/core/conversion_rates.dart';
 import 'package:zakaty/models/amount.dart';
 import 'package:zakaty/utils/date_only.dart';
@@ -20,9 +21,10 @@ class ZakatCalculation {
 
   ZakatCalculation({
     required this.title,
-    this.currency = 'TND',
+    String? currency,
     this.dueDate,
-  }) : _uid = const Uuid().v4();
+  }) : _uid = const Uuid().v4(),
+       currency = currency ?? (AppConfig.currencyOptions.isEmpty ? 'TND' : AppConfig.currencyOptions[0]);
 
   ZakatCalculation._internal({
     required String uid,
